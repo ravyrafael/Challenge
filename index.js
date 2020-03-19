@@ -38,7 +38,8 @@ for (var i = 0; i < mapa.length; i++) {
 locais.forEach((x, i)=>{
     if(x.char == "_"){
         if(locais[i].skills.length == 0){
-            var dev = devArray.filter(y=>y.positionY == undefined)[0]
+            var dev = devArray.filter(y=>y.positionY == undefined).map(x=>x).sort((a,b)=> b.points - a.points)
+            .sort((a,b)=> b.skills.length - a.skills.length)[0]
             devArray[dev.id].positionX = x.positionX;
             devArray[dev.id].positionY = x.positionY;
             var localY = locais.filter(y=>y.positionX == x.positionX && y.positionY == (x.positionY+ 1))[0]
@@ -69,13 +70,13 @@ locais.forEach((x, i)=>{
                 positionX:y.positionY,
                 sim: similarity(x.skills, y.skills)}));
 
-            var dev = arraySkills.sort((a,b)=> a.sim-b.sim).reverse()[0]; 
+            var dev = arraySkills.sort((a,b)=> b.sim-a.sim)[0]; 
             devArray[dev.id].positionX = x.positionX;
             devArray[dev.id].positionY = x.positionY;
-            var localY = locais.filter(y=>y.positionX == x.positionX && y.positionY == x.positionX++)[0]
-            var localX = locais.filter(y=>y.positionX == x.positionX++ && y.positionY == x.positionX)[0]
-            var localYant = locais.filter(y=>y.positionX == x.positionX && y.positionY == x.positionX--)[0]
-            var localXant = locais.filter(y=>y.positionX == x.positionX-- && y.positionY == x.positionX)[0]
+            var localY = locais.filter(y=>y.positionX == x.positionX && y.positionY == x.positionX++)[0];
+            var localX = locais.filter(y=>y.positionX == x.positionX++ && y.positionY == x.positionX)[0];
+            var localYant = locais.filter(y=>y.positionX == x.positionX && y.positionY == x.positionX--)[0];
+            var localXant = locais.filter(y=>y.positionX == x.positionX-- && y.positionY == x.positionX)[0];
             if(localY){
                 locais[localY.id].skills = locais[localY.id].skills.concat(devArray[dev.id].skills);
                 locais[localY.id].company = locais[localY.id].company.concat(devArray[dev.id].company);
@@ -114,20 +115,23 @@ locais.forEach((x, i)=>{
         }
     }
 })
+var logger = fs.createWriteStream('result.txt', {
+    flags: 'a' // 'a' means appending (old data will be preserved)
+  })
 devArray.forEach(x=>{
     if(x.positionX)   {
-        console.log(`${x.id} - ${x.positionX} ${x.positionY}`)
+        logger.write(`${x.positionX} ${x.positionY}\n`);
     }
         else{
-           console.log("X")
+            logger.write(`X\n`);
         }
 })
 managerArray.forEach(x=>{
     if(x.positionX)   {
-        console.log(`${x.positionX} ${x.positionY}`)
+        logger.write(`${x.positionX} ${x.positionY}\n`)
     }
         else{
-           console.log("X")
+           logger.write("X\n")
         }
 })
 function similarity(arrayX, arrayY){
